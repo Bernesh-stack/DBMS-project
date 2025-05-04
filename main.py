@@ -2,12 +2,17 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from database_connection import DatabaseConnection
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
 class CarServiceApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Car Service Management System")
         self.root.geometry("1200x800")
+        
+        # Load environment variables
+        load_dotenv()
         
         # Initialize database connection
         self.db = DatabaseConnection()
@@ -206,10 +211,16 @@ class CarServiceApp:
         email.grid(row=2, column=1, padx=5, pady=5)
         
         def save_customer():
-            # TODO: Implement customer addition logic
-            messagebox.showinfo("Success", "Customer added successfully")
-            add_window.destroy()
-            self.refresh_customers()
+            if not first_name.get() or not last_name.get() or not email.get():
+                messagebox.showerror("Error", "All fields are required")
+                return
+            
+            if self.db.add_customer(first_name.get(), last_name.get(), email.get()):
+                messagebox.showinfo("Success", "Customer added successfully")
+                add_window.destroy()
+                self.refresh_customers()
+            else:
+                messagebox.showerror("Error", "Failed to add customer")
         
         ttk.Button(add_window, text="Save", command=save_customer).grid(row=3, column=0, columnspan=2, pady=10)
     
@@ -232,13 +243,29 @@ class CarServiceApp:
         number_plate = ttk.Entry(add_window)
         number_plate.grid(row=2, column=1, padx=5, pady=5)
         
-        def save_car():
-            # TODO: Implement car addition logic
-            messagebox.showinfo("Success", "Car added successfully")
-            add_window.destroy()
-            self.refresh_cars()
+        ttk.Label(add_window, text="Customer ID:").grid(row=3, column=0, padx=5, pady=5)
+        customer_id = ttk.Entry(add_window)
+        customer_id.grid(row=3, column=1, padx=5, pady=5)
         
-        ttk.Button(add_window, text="Save", command=save_car).grid(row=3, column=0, columnspan=2, pady=10)
+        def save_car():
+            try:
+                customer_id_int = int(customer_id.get())
+            except ValueError:
+                messagebox.showerror("Error", "Customer ID must be a number")
+                return
+            
+            if not model.get() or not brand.get() or not number_plate.get():
+                messagebox.showerror("Error", "All fields are required")
+                return
+            
+            if self.db.add_car(model.get(), brand.get(), number_plate.get(), customer_id_int):
+                messagebox.showinfo("Success", "Car added successfully")
+                add_window.destroy()
+                self.refresh_cars()
+            else:
+                messagebox.showerror("Error", "Failed to add car")
+        
+        ttk.Button(add_window, text="Save", command=save_car).grid(row=4, column=0, columnspan=2, pady=10)
     
     def add_staff(self):
         # Create a new window for adding staff
@@ -259,13 +286,27 @@ class CarServiceApp:
         role = ttk.Entry(add_window)
         role.grid(row=2, column=1, padx=5, pady=5)
         
-        def save_staff():
-            # TODO: Implement staff addition logic
-            messagebox.showinfo("Success", "Staff added successfully")
-            add_window.destroy()
-            self.refresh_staff()
+        ttk.Label(add_window, text="Email:").grid(row=3, column=0, padx=5, pady=5)
+        email = ttk.Entry(add_window)
+        email.grid(row=3, column=1, padx=5, pady=5)
         
-        ttk.Button(add_window, text="Save", command=save_staff).grid(row=3, column=0, columnspan=2, pady=10)
+        ttk.Label(add_window, text="Address:").grid(row=4, column=0, padx=5, pady=5)
+        address = ttk.Entry(add_window)
+        address.grid(row=4, column=1, padx=5, pady=5)
+        
+        def save_staff():
+            if not first_name.get() or not last_name.get() or not role.get() or not email.get() or not address.get():
+                messagebox.showerror("Error", "All fields are required")
+                return
+            
+            if self.db.add_staff(first_name.get(), last_name.get(), role.get(), email.get(), address.get()):
+                messagebox.showinfo("Success", "Staff added successfully")
+                add_window.destroy()
+                self.refresh_staff()
+            else:
+                messagebox.showerror("Error", "Failed to add staff")
+        
+        ttk.Button(add_window, text="Save", command=save_staff).grid(row=5, column=0, columnspan=2, pady=10)
     
     def delete_customer(self):
         selected_item = self.customers_tree.selection()
@@ -273,9 +314,14 @@ class CarServiceApp:
             messagebox.showwarning("Warning", "Please select a customer to delete")
             return
         
+        customer_id = self.customers_tree.item(selected_item[0])['values'][0]
+        
         if messagebox.askyesno("Confirm", "Are you sure you want to delete this customer?"):
-            # TODO: Implement customer deletion logic
-            self.refresh_customers()
+            if self.db.delete_customer(customer_id):
+                messagebox.showinfo("Success", "Customer deleted successfully")
+                self.refresh_customers()
+            else:
+                messagebox.showerror("Error", "Failed to delete customer")
     
     def delete_car(self):
         selected_item = self.cars_tree.selection()
@@ -283,9 +329,14 @@ class CarServiceApp:
             messagebox.showwarning("Warning", "Please select a car to delete")
             return
         
+        car_id = self.cars_tree.item(selected_item[0])['values'][0]
+        
         if messagebox.askyesno("Confirm", "Are you sure you want to delete this car?"):
-            # TODO: Implement car deletion logic
-            self.refresh_cars()
+            if self.db.delete_car(car_id):
+                messagebox.showinfo("Success", "Car deleted successfully")
+                self.refresh_cars()
+            else:
+                messagebox.showerror("Error", "Failed to delete car")
     
     def delete_staff(self):
         selected_item = self.staff_tree.selection()
@@ -293,9 +344,14 @@ class CarServiceApp:
             messagebox.showwarning("Warning", "Please select a staff member to delete")
             return
         
+        staff_id = self.staff_tree.item(selected_item[0])['values'][0]
+        
         if messagebox.askyesno("Confirm", "Are you sure you want to delete this staff member?"):
-            # TODO: Implement staff deletion logic
-            self.refresh_staff()
+            if self.db.delete_staff(staff_id):
+                messagebox.showinfo("Success", "Staff member deleted successfully")
+                self.refresh_staff()
+            else:
+                messagebox.showerror("Error", "Failed to delete staff member")
 
 if __name__ == "__main__":
     root = tk.Tk()
