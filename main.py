@@ -11,6 +11,10 @@ class CarServiceApp:
         self.root.title("Car Service Management System")
         self.root.geometry("1200x800")
         
+        # Initialize status variable
+        self.status_var = tk.StringVar()
+        self.status_var.set("Ready")
+        
         # Load environment variables
         load_dotenv()
         
@@ -43,8 +47,6 @@ class CarServiceApp:
         self.setup_staff_tab()
         
         # Add status bar
-        self.status_var = tk.StringVar()
-        self.status_var.set("Ready")
         status_bar = ttk.Label(root, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
         
