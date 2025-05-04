@@ -144,63 +144,6 @@ class DatabaseConnection:
                     number_plate VARCHAR(20) UNIQUE NOT NULL,
                     customer_id INTEGER NOT NULL,
                     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE
-                )""",
-                """CREATE TABLE IF NOT EXISTS Discount (
-                    discount_id SERIAL PRIMARY KEY,
-                    percentage_discount DECIMAL(5,2) NOT NULL
-                )""",
-                """CREATE TABLE IF NOT EXISTS Payment (
-                    payment_id SERIAL PRIMARY KEY,
-                    amount DECIMAL(10,2) NOT NULL,
-                    discount_id INTEGER,
-                    status VARCHAR(20) CHECK (status IN ('Completed', 'Pending', 'Failed')),
-                    FOREIGN KEY (discount_id) REFERENCES Discount(discount_id) ON DELETE SET NULL
-                )""",
-                """CREATE TABLE IF NOT EXISTS Feedback (
-                    feedback_id SERIAL PRIMARY KEY,
-                    customer_id INTEGER NOT NULL,
-                    comments TEXT NOT NULL,
-                    feedback_date DATE NOT NULL,
-                    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
-                    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE
-                )""",
-                """CREATE TABLE IF NOT EXISTS ServiceCategory (
-                    servicecategory_id SERIAL PRIMARY KEY,
-                    category_name VARCHAR(100) UNIQUE NOT NULL
-                )""",
-                """CREATE TABLE IF NOT EXISTS VehicleList (
-                    vehiclelist_id SERIAL PRIMARY KEY,
-                    number_plate VARCHAR(20) NOT NULL,
-                    servicecategory_id INTEGER NOT NULL,
-                    registration_date DATE NOT NULL,
-                    vehicle_type VARCHAR(50),
-                    FOREIGN KEY (number_plate) REFERENCES Car(number_plate) ON DELETE CASCADE,
-                    FOREIGN KEY (servicecategory_id) REFERENCES ServiceCategory(servicecategory_id) ON DELETE CASCADE
-                )""",
-                """CREATE TABLE IF NOT EXISTS Sparepart (
-                    sparepart_id SERIAL PRIMARY KEY,
-                    part_name VARCHAR(100) NOT NULL,
-                    price DECIMAL(10,2) NOT NULL
-                )""",
-                """CREATE TABLE IF NOT EXISTS Report (
-                    report_id SERIAL PRIMARY KEY,
-                    report_date DATE NOT NULL,
-                    description_text TEXT NOT NULL,
-                    staff_id INTEGER NOT NULL,
-                    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id) ON DELETE CASCADE
-                )""",
-                """CREATE TABLE IF NOT EXISTS ServiceComplete (
-                    servicecomplete_id SERIAL PRIMARY KEY,
-                    time_completion TIME NOT NULL,
-                    customer_id INTEGER NOT NULL,
-                    completion_date DATE NOT NULL,
-                    staff_id INTEGER NOT NULL,
-                    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE,
-                    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id) ON DELETE CASCADE
-                )""",
-                """CREATE TABLE IF NOT EXISTS Emergency (
-                    emergency_id SERIAL PRIMARY KEY,
-                    phone_number VARCHAR(15) UNIQUE NOT NULL
                 )"""
             ]
 
@@ -231,12 +174,6 @@ class DatabaseConnection:
                 INSERT INTO Car (model, brand, number_plate, customer_id)
                 VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING
             """, ("Civic", "Honda", "TN10AB1234", 1))
-            
-            # Insert sample data for ServiceCategory
-            self.execute_query("""
-                INSERT INTO ServiceCategory (category_name)
-                VALUES (%s) ON CONFLICT DO NOTHING
-            """, ("Oil Change",))
             
             # Insert sample data for Staff
             self.execute_query("""

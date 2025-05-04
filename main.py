@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 class CarServiceApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Car Service Management System")
+        self.root.title("Car Management System")
         self.root.geometry("1200x800")
         
         # Initialize status variable
@@ -76,7 +76,7 @@ class CarServiceApp:
         help_menu.add_command(label="About", command=self.show_about)
     
     def show_about(self):
-        messagebox.showinfo("About", "Car Service Management System\nVersion 1.0")
+        messagebox.showinfo("About", "Car Management System\nVersion 1.0")
     
     def setup_customers_tab(self):
         # Create treeview
