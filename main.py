@@ -21,12 +21,20 @@ class CarServiceApp:
         # Initialize database connection
         self.db = DatabaseConnection()
         if not self.db.connect():
-            messagebox.showerror("Error", "Failed to connect to database")
+            self.status_var.set("Database connection failed. Please check your credentials.")
+            messagebox.showerror("Error", "Failed to connect to database. Please check your credentials.")
             return
         
         # Create tables and insert sample data
-        self.db.create_tables()
-        self.db.insert_sample_data()
+        if not self.db.create_tables():
+            self.status_var.set("Failed to create database tables.")
+            messagebox.showerror("Error", "Failed to create database tables.")
+            return
+            
+        if not self.db.insert_sample_data():
+            self.status_var.set("Failed to insert sample data.")
+            messagebox.showerror("Error", "Failed to insert sample data.")
+            return
         
         # Create main notebook (tabs)
         self.notebook = ttk.Notebook(root)
